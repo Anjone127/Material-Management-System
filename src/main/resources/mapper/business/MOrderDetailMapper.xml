@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.business.mapper.MOrderDetailMapper">
+
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.business.model.MOrderDetail">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="material_id" property="materialId" jdbcType="VARCHAR" />
+		<result column="material_number" property="materialNumber" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="INTEGER" />
+		<result column="cancel_amount" property="cancelAmount" jdbcType="INTEGER" />
+		<result column="price" property="price" jdbcType="DOUBLE" />
+	</resultMap>
+	
+	<sql id="selectFrom">
+		select id,order_id,material_id,material_number,amount,cancel_amount,price
+		from m_order_detail
+	</sql>
+	
+	<sql id="page"> 
+		<where>
+			<if test="orderId !=null and orderId !=''">
+				and order_id = #{orderId}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="queryPage" resultMap="BaseResultMap" parameterType="cn.edu.zucc.anjone.mrp.business.dto.MOrderDetailDto">
+		<include refid="selectFrom"></include>
+		<include refid="page"></include>
+		limit #{start},#{length}
+	</select>
+	
+	<select id="selectByMaterialNumberAndOrderId" parameterType="String" resultMap="BaseResultMap">
+		<include refid="selectFrom"></include>
+		where material_id=#{materialId} and order_id=#{orderId}
+	</select>
+	
+	<select id="selectByOrderId" parameterType="String" resultMap="BaseResultMap">
+		<include refid="selectFrom"></include>
+		where order_id = #{orderId}
+	</select>
+	
+	<select id="selectByKey" parameterType="String" resultMap="BaseResultMap">
+		<include refid="selectFrom"></include>
+		where id=#{id}
+	</select>
+	
+	<update id="updateAmountByKey" parameterType="cn.edu.zucc.anjone.mrp.business.dto.MOrderDetailDto">
+		update m_order_detail 
+		set amount=#{amount}
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteByKey" parameterType="String" >
+		delete from m_order_detail 
+		where id=#{id}
+	</delete>
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.business.dto.MOrderDetailDto" >
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">  
+	        select  replace(uuid(),'-','')   from dual  
+	    </selectKey>
+		insert into
+		m_order_detail(id,order_id,material_id,material_number,amount,cancel_amount,price)
+		values (#{id},#{orderId},#{materialId},#{materialNumber},#{amount},0,#{price})
+	</insert>
+
+	<select id="getCount" resultType="java.lang.Integer" parameterType="cn.edu.zucc.anjone.mrp.business.dto.MOrderDetailDto" >
+		select count(1) from m_order_detail
+		<include refid="page"></include>
+	</select>
+</mapper>

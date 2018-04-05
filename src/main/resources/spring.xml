@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="cn.edu.zucc.anjone.mrp">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl"
+			value="jdbc:mysql://127.0.0.1:3306/MRP?useUnicode=true&amp;characterEncoding=UTF-8" />
+		<property name="user" value="root" />
+		<property name="password" value="" />
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="typeAliasesPackage" value="cn.edu.zucc.anjone.mrp.*.model"></property>
+		<property name="mapperLocations" value="classpath:**/mapper/*/*Mapper.xml" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="cn.edu.zucc.anjone.mrp.*.mapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- Realm实现 -->
+	<bean id="myRealm" class="cn.edu.zucc.anjone.mrp.util.MyRealm"/>
+	
+	<bean id="myFilter" class="cn.edu.zucc.anjone.mrp.util.MyFilter" />
+	
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myRealm" />
+	</bean>
+	<!-- Shiro过滤器 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- Shiro的核心安全接口,这个属性是必须的 -->
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login" />
+		<property name="successUrl" value="/first" />
+		<property name="unauthorizedUrl" value="/login" />
+		<property name="filters">  
+            <map>  
+                <entry key="myFilter" value-ref="myFilter"/>  
+            </map>  
+        </property>  
+		<property name="filterChainDefinitions">
+			<value>
+				/img/** = anon
+				/css/** = anon
+				/font/** = anon
+				/js/** = anon
+				/styles/** = anon
+				/login = anon
+				/logout = authc
+				/menu = authc
+				/info/customer/** = myFilter["admin,sale,production"]
+				/info/material/** = myFilter["admin,purchase,production"]
+				/info/product/** = myFilter["admin,sale,production"]
+				/info/producttype/** = myFilter["admin,sale,production"]
+				/info/supplier/** = myFilter["admin,purchase,production"]
+				/manage/accounts/** = myFilter["admin,purchase,sale"]
+				/manage/lnventoryLog/** = myFilter["admin,production"]
+				/manage/materialInventory/** = myFilter["admin,purchase,production"]
+				/manage/productInventory/** = myFilter["admin,sale,production"]
+				/business/morder/** = myFilter["admin,purchase"]
+				/business/porder/** = myFilter["admin,sale"]
+				/business/production/** = myFilter["admin,production"]
+				/system/** = myFilter[admin]
+			</value>
+		</property>
+	</bean>
+</beans>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.info.mapper.MaterialMapper">
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.info.model.Material">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="supplier_number" property="supplierNumber" jdbcType="VARCHAR" />
+		<result column="number" property="number" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="DOUBLE" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="queryPage" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.info.dto.MaterialDto">
+		select
+			id,number,name,price,type,description,supplier_number
+		from
+			material
+		<where>
+			<if test="number!=null and number !=''">
+				and number like #{number}
+			</if>
+			<if test="name!=null and name !=''">
+				and name like #{name}
+			</if>
+			<if test="supplierNumber != null and supplierNumber !=''">
+				and supplier_number like #{supplierNumber}
+			</if>
+			<if test="type !=null and type !=''">
+				and type like #{type}
+			</if>
+		</where>
+		limit #{start},#{length}
+	</select>
+
+	<select id="selectByKey" parameterType="String" resultMap="BaseResultMap">
+		select
+			id,number,name,price,type,description,supplier_number
+		from
+			material
+		where 
+			id=#{id}
+	</select>
+	
+	<select id="selectByNumber" parameterType="String" resultMap="BaseResultMap">
+		select
+			id,number,name,price,type,description,supplier_number
+		from
+			material
+		where number=#{number}
+	</select>
+	
+	<select id="selectByName" parameterType="String" resultMap="BaseResultMap">
+		select
+			id,number,name,price,type,description,supplier_number
+		from
+			material
+		where name=#{name}
+	</select>
+	
+	<update id="updateById" parameterType="cn.edu.zucc.anjone.mrp.info.dto.MaterialDto">
+		update material 
+		set number=#{number},name=#{name},price=#{price},type=#{type},description=#{description}
+		where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.info.dto.MaterialDto" keyProperty="id" >
+	    <selectKey keyProperty="id" resultType="String" order="BEFORE">  
+	        select  replace(uuid(),'-','')   from dual  
+	    </selectKey>
+		insert into
+		material(id,number,name,price,type,description,supplier_number)
+		values
+		(#{id},#{number},#{name},#{price},#{type},#{description},#{supplierNumber})
+	</insert>
+
+	<delete id="deleteByKey" parameterType="String">
+		delete from material where id = #{id}
+	</delete>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(1) from material
+				<where>
+			<if test="number!=null and number !=''">
+				and number like #{number}
+			</if>
+			<if test="name!=null and name !=''">
+				and name like #{name}
+			</if>
+			<if test="supplierNumber != null and supplierNumber !=''">
+				and supplier_number like #{supplierNumber}
+			</if>
+			<if test="type !=null and type !=''">
+				and type like #{type}
+			</if>
+		</where>
+	</select>
+</mapper>

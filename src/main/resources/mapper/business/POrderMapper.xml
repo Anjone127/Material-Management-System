@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.business.mapper.POrderMapper">
+
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.business.model.POrder">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="number" property="number" jdbcType="VARCHAR" />
+		<result column="customer_number" property="customerNumber"
+			jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="total_money" property="totalMoney" jdbcType="DOUBLE" />
+		<result column="cancel_money" property="cancelMoney" jdbcType="DOUBLE" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+		<result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+		<result column="final_time" property="finalTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<resultMap id="Map" extends="BaseResultMap" type="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+	</resultMap>
+	
+	<sql id="selectFrom">
+		select
+		id,number,customer_number,address,total_money,cancel_money,state,start_time,final_time,remark
+		from p_order
+	</sql>
+
+	<sql id="page">
+		<where>
+			<if test="number !=null and number !=''">
+				and number like #{number}
+			</if>
+		</where>
+	</sql>
+
+	<select id="queryPage" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+		<include refid="selectFrom"></include>
+		<include refid="page"></include>
+		order by start_time desc
+		limit #{start},#{length}
+	</select>
+
+	<select id="selectByKey" parameterType="String" resultMap="Map">
+		<include refid="selectFrom"></include>
+		where id=#{id}
+	</select>
+
+	<select id="selectByNumber" parameterType="String" resultMap="BaseResultMap">
+		<include refid="selectFrom"></include>
+		where number=#{number}
+	</select>
+
+	<update id="updateById" parameterType="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+		update p_order
+		set
+		address=#{address},cancel_money=#{cancelMoney},state=#{state},final_time=#{finalTime},linkman=#{linkman},tel=#{tel},remark=#{remark},money=#{money}
+		where id=#{id}
+	</update>
+
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			select replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into
+		p_order(id,number,customer_number,address,total_money,cancel_money,state,start_time,final_time,remark)
+		values
+		(#{id},#{number},#{customerNumber},#{address},0,0,0,#{startTime},#{finalTime},#{remark})
+	</insert>
+
+	<select id="getCount" resultType="java.lang.Integer"
+		parameterType="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+		select count(1) from p_order
+		<include refid="page"></include>
+	</select>
+
+	<update id="updateState" parameterType="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+		update p_order
+		set state=#{state}
+		where id=#{id}
+	</update>
+	
+	<update id="updateTotalMoney" parameterType="cn.edu.zucc.anjone.mrp.business.dto.POrderDto">
+		update p_order set total_money=#{totalMoney} where id=#{id}
+	</update>
+	<delete id="deleteByKey" parameterType="String"> 
+		delete from p_order
+		where id=#{id}
+	</delete>
+</mapper>

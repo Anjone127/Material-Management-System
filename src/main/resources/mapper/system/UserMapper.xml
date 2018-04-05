@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.system.mapper.UserMapper">
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.system.model.User">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="VARCHAR" />
+		<result column="user_password" property="userPassword" jdbcType="VARCHAR" />
+		<result column="user_password_salt" property="userPasswordSalt" jdbcType="VARCHAR" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="user_role_id" property="userRoleId" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="BaseSelect">
+		select id,user_id,user_password,user_password_salt,user_name,user_role_id
+		from user
+	</sql>
+	
+	<sql id="QueryPageLimit">
+		<where>
+			<if test="userId!=null and userId !=''">
+				and user_id like #{userId}
+			</if>
+			<if test="userName!=null  and userName !=''">
+				and user_name like #{userName}
+			</if>
+			<if test="userRoleId !=null  and userRoleId !=''">
+				and user_role_id like #{userRoleId}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectRoleNameByUserId" parameterType="String" resultType="String">
+		SELECT r.role_name FROM role r,USER u WHERE r.id=u.user_role_id AND u.user_id= #{userId}
+	</select>
+	
+	<select id="queryPage" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.system.dto.UserDto">
+		select id,user_id,user_name,user_role_id
+		from user
+		<include refid="QueryPageLimit"></include>
+		limit #{start},#{length}
+	</select>
+
+	<select id="selectByKey" parameterType="String" resultMap="BaseResultMap">
+		<include refid="BaseSelect"></include>
+		where id=#{id}
+	</select>
+	
+	<select id="selectByUserId" parameterType="String" resultMap="BaseResultMap">
+		<include refid="BaseSelect"></include>
+		where user_id=#{userId}
+	</select>
+	
+	<update id="updateById" parameterType="cn.edu.zucc.anjone.mrp.system.dto.UserDto">
+		update user 
+		set user_password=#{userPassword},user_password_salt=#{userPasswordSalt},user_name=#{userName},user_role_id=#{userRoleId}
+		where id=#{id}
+	</update>
+	
+	<update id="updateNameAndRoleById" parameterType="cn.edu.zucc.anjone.mrp.system.dto.UserDto">
+		update user 
+		set user_name=#{userName},user_role_id=#{userRoleId}
+		where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.system.dto.UserDto" >
+	    <selectKey keyProperty="id" resultType="String" order="BEFORE">  
+	        select  replace(uuid(),'-','')   from dual  
+	    </selectKey>
+		insert into user(id,user_id,user_password,user_password_salt,user_name,user_role_id)
+		values (#{id},#{userId},#{userPassword},#{userPasswordSalt},#{userName},#{userRoleId})
+	</insert>
+
+	<delete id="deleteByKey" parameterType="String">
+		delete from user where id = #{id}
+	</delete>
+
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(1) from user
+		<include refid="QueryPageLimit"></include>
+	</select>
+</mapper>

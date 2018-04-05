@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.system.mapper.RoleMapper">
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.system.model.Role">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="BaseSelect">
+		select id,name,description
+		from role
+	</sql>
+	
+	<sql id="QueryPageLimit">
+		<where>
+			<if test="name !=null and name !=''">
+				and name like #{name}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectAll" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.system.dto.RoleDto">
+		<include refid="BaseSelect"></include>
+	</select>
+	<select id="queryPage" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.system.dto.RoleDto">
+		<include refid="BaseSelect"></include>
+		<include refid="QueryPageLimit"></include>
+		limit #{start},#{length}
+	</select>
+
+	<select id="selectByKey" parameterType="String" resultMap="BaseResultMap">
+		<include refid="BaseSelect"></include>
+		where 
+			id=#{id}
+	</select>
+	
+	<update id="updateById" parameterType="cn.edu.zucc.anjone.mrp.system.dto.RoleDto">
+		update role 
+		set description=#{description}
+		where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.system.dto.RoleDto" >
+	    <selectKey keyProperty="id" resultType="String" order="BEFORE">  
+	        select  replace(uuid(),'-','')   from dual  
+	    </selectKey>
+		insert into
+		role(id,name,description)
+		values
+		(#{id},#{name},#{description})
+	</insert>
+
+	<delete id="deleteByKey" parameterType="String">
+		delete from role where id = #{id}
+	</delete>
+
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(1) from role
+		<include refid="QueryPageLimit"></include>
+	</select>
+</mapper>

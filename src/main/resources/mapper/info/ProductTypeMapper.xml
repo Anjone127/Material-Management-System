@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.info.mapper.ProductTypeMapper">
+
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.info.model.ProductType">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="number" property="number" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="selectAll" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.info.dto.ProductTypeDto">
+		select
+			id,number,name,description
+		from
+			product_type
+	</select>
+	
+	<select id="queryPage" resultMap="BaseResultMap"
+		parameterType="cn.edu.zucc.anjone.mrp.info.dto.ProductTypeDto">
+		select
+			id,number,name,description
+		from
+			product_type
+		<where>
+			<if test="name!=null and name!=''">
+				and name like #{name}
+			</if>
+			<if test="number!=null and number!=''">
+				and number like #{number}
+			</if>
+		</where>
+		limit #{start},#{length}
+	</select>
+
+	<select id="selectByKey" parameterType="String" resultMap="BaseResultMap">
+		select
+			id,number,name,description
+		from
+			product_type
+		where id=#{id}
+	</select>
+	
+	<select id="selectByNumber" parameterType="String" resultMap="BaseResultMap">
+		select
+			id,number,name,description
+		from
+			product_type
+		where number=#{number}
+	</select>
+	
+	<update id="updateById" parameterType="cn.edu.zucc.anjone.mrp.info.dto.ProductTypeDto">
+		update product_type 
+		set number=#{number},name=#{name},description=#{description}
+		where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.info.dto.ProductTypeDto" >
+	    <selectKey keyProperty="id" resultType="String" order="BEFORE">  
+	        select  replace(uuid(),'-','')   from dual  
+	    </selectKey>
+		insert into
+		product_type(id,number,name,description)
+		values
+		(#{id},#{number},#{name},#{description})
+	</insert>
+
+	<delete id="deleteByKey" parameterType="String">
+		delete from product_type where id= #{id}
+	</delete>
+	
+	<select id="getCount" resultType="java.lang.Integer" parameterType="cn.edu.zucc.anjone.mrp.info.dto.ProductTypeDto" >
+		select count(1) from product_type
+		<where>
+			<if test="name!=null and name!=''">
+				and name like #{name}
+			</if>
+			<if test="number!=null and number!=''">
+				and number like #{number}
+			</if>
+		</where>
+	</select>
+</mapper>

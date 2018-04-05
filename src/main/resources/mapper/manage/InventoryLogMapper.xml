@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.manage.mapper.InventoryLogMapper">
+	<resultMap id="BaseResultMap" type="cn.edu.zucc.anjone.mrp.manage.model.InventoryLog">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="date" property="date" jdbcType="TIMESTAMP" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="inventory_name" property="inventoryName" jdbcType="VARCHAR" />
+		<result column="inventory_id" property="inventoryId" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<sql id="queryPageLimit">
+		<where>
+			<if test="type != null and type !=''">
+				and type like #{type}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="queryPage" resultMap="BaseResultMap" parameterType="cn.edu.zucc.anjone.mrp.manage.dto.InventoryLogDto">
+		select id, date, type, inventory_name ,inventory_id,amount
+		from inventory_log
+		<include refid="queryPageLimit"></include>
+		order by date desc
+		limit #{start},#{length}
+	</select>
+	
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.manage.dto.InventoryLogDto" >
+	    <selectKey keyProperty="id" resultType="String" order="BEFORE">  
+	        select  replace(uuid(),'-','')   from dual  
+	    </selectKey>
+		insert into
+		inventory_log(id, date, type, inventory_name ,inventory_id,amount)
+		values (#{id},#{date},#{type},#{inventoryName},#{inventoryId},#{amount})
+	</insert>
+
+	<select id="getCount" resultType="java.lang.Integer" parameterType="cn.edu.zucc.anjone.mrp.manage.dto.InventoryLogDto" >
+		select count(1) from inventory_log
+		<include refid="queryPageLimit"></include>
+	</select>
+</mapper>

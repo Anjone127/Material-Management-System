@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.business.mapper.AccountsMapper">
+	<resultMap id="BaseMap"
+		type="cn.edu.zucc.anjone.mrp.business.model.Accounts">
+		<result column="id" property="id" jdbcType="VARCHAR" />
+		<result column="people_id" property="peopleId" jdbcType="VARCHAR" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="DOUBLE" />
+		<result column="date" property="date" jdbcType="TIMESTAMP" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<resultMap id="DtoMap" type="cn.edu.zucc.anjone.mrp.business.dto.AccountsDto" extends="BaseMap"></resultMap>
+	
+	<sql id="BaseSelect">
+		select
+			id,people_id,order_id,amount,date,type,state,remark
+		from accounts
+	</sql>
+
+	<sql id="PageLimit">
+		<where>
+			<if test="type !=null and type !=''">
+				and type = #{type}
+			</if>
+			<if test="stDate !=null and stDate !=''">
+				and date &gt; #{stDate}
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				and date &lt; #{endDate}
+			</if>
+			<if test="peopleId !=null and peopleId !=''">
+				and people_id = #{peopleId}
+			</if>
+		</where>
+	</sql>
+	
+	<insert id="insert">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into accounts(id,people_id,order_id,amount,date,type,state,remark) 
+		values (#{id},#{peopleId},#{orderId},#{amount},#{date},#{type},#{state},#{remark})
+	</insert>
+	
+	<select id="selectByLimit" parameterType="cn.edu.zucc.anjone.mrp.business.dto.AccountsDto" resultMap="DtoMap">
+		<include refid="BaseSelect"></include>
+		<include refid="PageLimit"></include>
+		order by date desc
+	</select>
+	
+	<select id="queryPage" parameterType="cn.edu.zucc.anjone.mrp.business.dto.AccountsDto" resultMap="DtoMap">
+		<include refid="BaseSelect"></include>
+		<include refid="PageLimit"></include>
+		order by date desc
+		limit #{start},#{length}
+	</select>
+	
+	<select id="getCount"  resultType="java.lang.Integer" parameterType="cn.edu.zucc.anjone.mrp.business.dto.AccountsDto">
+		select count(1) from accounts
+		<include refid="PageLimit"></include>
+	</select>
+	
+	<update id="updateState">
+		update accounts set state=#{state} where id=#{id}
+	</update>
+</mapper>

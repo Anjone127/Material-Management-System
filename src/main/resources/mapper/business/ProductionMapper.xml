@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.business.mapper.ProductionMapper">
+	<resultMap id="BaseResultMap"
+		type="cn.edu.zucc.anjone.mrp.business.model.Production">
+		<result column="id" property="id" jdbcType="INTEGER" />
+		<result column="product_number" property="productNumber" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="INTEGER" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+		<result column="date" property="date" jdbcType="VARCHAR" />
+		<result column="finish_time" property="finishTime" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="Map" extends="BaseResultMap"
+		type="cn.edu.zucc.anjone.mrp.business.dto.ProductionDto">
+		<result column="id" property="id" jdbcType="INTEGER" />
+		<result column="product_number" property="productNumber" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="INTEGER" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+		<result column="date" property="date" jdbcType="VARCHAR" />
+		<result column="finish_time" property="finishTime" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="BaseSelect">
+		select id,product_number,amount,state,date,finish_time
+		from production
+	</sql>
+
+	<sql id="PageLimit">
+		<where>
+			<if test="id !=null and id !=''">
+				and id = #{id}
+			</if>
+			<if test="productNumber !=null and productNumber !=''">
+				and product_number = #{productNumber}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="queryPage" resultMap="BaseResultMap" parameterType="cn.edu.zucc.anjone.mrp.business.dto.ProductionDto">
+		<include refid="BaseSelect"></include>
+		<include refid="PageLimit"></include>
+		limit #{start},#{length}
+	</select>
+	
+	<select id="selectByKey" resultMap="Map" parameterType="cn.edu.zucc.anjone.mrp.business.dto.ProductionDto">
+		<include refid="BaseSelect"></include>
+		where id=#{id};	
+	</select>
+	
+	<delete id="deleteByKey" parameterType="String" >
+		delete from production 
+		where id=#{id}
+	</delete>
+	
+	<insert id="insert" parameterType="cn.edu.zucc.anjone.mrp.business.dto.ProductionDto" >
+		insert into
+		production(product_number,amount,state,date)
+		values (#{productNumber},#{amount},0,#{date})
+	</insert>
+
+	<select id="getCount" resultType="java.lang.Integer" parameterType="cn.edu.zucc.anjone.mrp.business.dto.ProductionDto" >
+		select count(1) from production
+		<include refid="PageLimit"></include>
+	</select>
+	
+	<update id="updateState">
+		update production set state=#{state} where id=#{id}
+	</update>
+</mapper>

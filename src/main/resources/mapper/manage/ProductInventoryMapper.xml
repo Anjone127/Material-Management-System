@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.zucc.anjone.mrp.manage.mapper.ProductInventoryMapper">
+
+	<resultMap id="BaseResultMap"
+		type="cn.edu.zucc.anjone.mrp.manage.model.ProductInventory">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="product_id" property="productId" jdbcType="VARCHAR" />
+		<result column="product_number" property="productNumber" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap type="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto"
+		id="Map" extends="BaseResultMap">
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="number" property="number" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="BaseSelectSQL">
+		select id, product_id , product_number , amount
+		from product_inventory
+	</sql>
+	
+	<select id="queryPage" resultMap="Map"
+		parameterType="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto">
+		select
+			PI.id, P.number , P.name, PI.product_id, PI.amount
+		from
+			product_inventory PI,product P
+		<where>
+			P.id = PI.product_id
+			<if test="number !=null and number !=''">
+				and P.number like #{number}
+			</if>
+			<if test="name !=null and name !=''">
+				and P.name like #{name}
+			</if>
+		</where>
+		limit #{start},#{length}
+	</select>
+
+	<select id="selectByKey" parameterType="String" resultMap="Map">
+		select
+			PI.id, P.number , P.name, PI.product_id, PI.amount
+		from
+			product_inventory PI,product P
+		where P.id = PI.product_id and PI.id=#{id} 
+	</select>
+
+	<select id="selectByProductNumber" parameterType="String" resultMap="Map">
+		<include refid="BaseSelectSQL"></include>
+		where product_number=#{productNumber} 
+	</select>
+	
+	<update id="updateAmountByKey" parameterType="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto">
+		update product_inventory
+		set amount=#{amount}
+		where id=#{id}
+	</update>
+	
+	<update id="updateAmountByProductId" parameterType="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto">
+		update product_inventory
+		set amount=#{amount}
+		where product_id=#{productId}
+	</update>
+	
+	<update id="updateAmountByProductNumber" parameterType="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto">
+		update product_inventory
+		set amount=#{amount}
+		where product_number=#{productNumber}
+	</update>
+	
+	<insert id="insert"
+		parameterType="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			select replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into
+		product_inventory(id,product_id,amount)
+		values
+		(#{id},#{productId},0)
+	</insert>
+
+	<delete id="deleteByProductId" parameterType="String">
+		delete from
+		product_inventory where product_id = #{productId}
+	</delete>
+
+	<select id="getCount" resultType="java.lang.Integer"
+		parameterType="cn.edu.zucc.anjone.mrp.manage.dto.ProductInventoryDto">
+		select count(1) from product_inventory PI , product P
+		<where>
+			P.id = PI.product_id
+			<if test="number !=null and number !=''">
+				and P.number like #{number}
+			</if>
+			<if test="name !=null and name !=''">
+				and P.name like #{name}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectByProductId" parameterType="String" resultMap="BaseResultMap">
+		<include refid="BaseSelectSQL"></include>
+		where product_id=#{productId}
+	</select>
+	
+</mapper>
