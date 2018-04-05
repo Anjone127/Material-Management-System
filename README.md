@@ -3,9 +3,9 @@ materials-management-system is base on SSM.(spring springMVC mybatis)
 
 web jsp-> layui
 
-[![ScreenShot](https://github.com/anjone127/Material-Management-System.git/1.png)
+![ScreenShot](https://raw.githubusercontent.com/Anjone127/Material-Management-System/master/1.png)
 
-#DATABASE
+# DATABASE
 mysql
 see mrp.sql
 
